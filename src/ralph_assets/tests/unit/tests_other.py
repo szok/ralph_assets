@@ -9,6 +9,7 @@ import datetime
 
 from dj.choices import Country
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.test import TestCase
 from django.test.utils import override_settings
 from ralph.account.models import Region
@@ -35,19 +36,19 @@ from ralph_assets.tests.utils.licences import (
     SoftwareCategoryFactory,
 )
 from ralph_assets.utils import iso2_to_iso3, iso3_to_iso2
-from ralph_assets.views.utils import get_transition_url
 
 
 class TestExportRelations(TestCase):
-    def setUp(self):
-        self.user = UserFactory(
+    @classmethod
+    def setUpClass(cls):
+        cls.user = UserFactory(
             username='user',
             is_staff=False,
             is_superuser=False,
             first_name='Elmer',
             last_name='Stevens',
         )
-        self.owner = UserFactory(
+        cls.owner = UserFactory(
             username='owner',
             is_staff=False,
             is_superuser=False,
@@ -55,28 +56,28 @@ class TestExportRelations(TestCase):
             last_name='Brown',
         )
 
-        self.category = AssetCategoryFactory(name='Subcategory')
-        self.model = AssetModelFactory(
+        cls.category = AssetCategoryFactory(name='Subcategory')
+        cls.model = AssetModelFactory(
             name='Model1',
-            category=self.category,
+            category=cls.category,
             manufacturer=AssetManufacturerFactory(name='Manufacturer1')
         )
-        self.warehouse = WarehouseFactory(name='Warehouse')
-        self.asset = AssetFactory(
+        cls.warehouse = WarehouseFactory(name='Warehouse')
+        cls.asset = AssetFactory(
             order_no='Order No2',
             invoice_no='invoice-6666',
             invoice_date=datetime.date(2014, 4, 28),
             support_type='Support d2d',
             sn='1111-1111-1111-1111',
-            model=self.model,
-            user=self.user,
-            owner=self.owner,
+            model=cls.model,
+            user=cls.user,
+            owner=cls.owner,
             barcode='br-666',
             niw='niw=666',
-            warehouse=self.warehouse,
+            warehouse=cls.warehouse,
         )
-        self.software_category = SoftwareCategoryFactory(name='soft-cat1')
-        self.licence1 = LicenceFactory(
+        cls.software_category = SoftwareCategoryFactory(name='soft-cat1')
+        cls.licence1 = LicenceFactory(
             invoice_date=datetime.date(2014, 4, 28),
             invoice_no="666-999-666",
             niw="niw-666",
@@ -84,14 +85,14 @@ class TestExportRelations(TestCase):
             price=1000.0,
             region=Region.get_default_region(),
             sn="test-sn",
-            software_category=self.software_category,
+            software_category=cls.software_category,
         )
-        self.licence1.save()
+        cls.licence1.save()
 
     def test_assets_rows(self):
         rows = [item for item in get_assets_rows()]
 
-        self.assertEqual(
+        self.assertListEqual(
             rows,
             [
                 [
@@ -104,11 +105,12 @@ class TestExportRelations(TestCase):
                     'invoice_no', 'region__name',
                 ],
                 [
-                    1, 'niw=666', 'br-666', '1111-1111-1111-1111',
-                    'Subcategory', 'Manufacturer1', 'Model1', 'user',
-                    'Elmer', 'Stevens', 'owner', 'Eric', 'Brown', 1, None,
-                    None, 'Warehouse', datetime.date(2014, 4, 28),
-                    'invoice-6666', 'Default region',
+                    self.asset.id, 'niw=666', 'br-666',
+                    '1111-1111-1111-1111', 'Subcategory', 'Manufacturer1',
+                    'Model1', 'user', 'Elmer', 'Stevens', 'owner', 'Eric',
+                    'Brown', 1, None, None, 'Warehouse',
+                    datetime.date(2014, 4, 28), 'invoice-6666',
+                    'Default region',
                 ],
             ]
         )
@@ -118,8 +120,7 @@ class TestExportRelations(TestCase):
         self.licence1.assign(self.user)
         self.licence1.assign(self.owner)
         rows = [item for item in get_licences_rows()]
-
-        self.assertEqual(
+        self.assertListEqual(
             rows,
             [
                 [
@@ -131,25 +132,26 @@ class TestExportRelations(TestCase):
                     'first_name', 'last_name', 'single_cost',
                 ],
                 [
-                    'niw-666', 'soft-cat1', '10', '1000', '2014-04-28',
+                    'niw-666', 'soft-cat1', '10', '1000.00', '2014-04-28',
                     '666-999-666', '', '', '', '', '', '', '', '', '', '', '',
                     '', '',
                 ],
                 [
-                    'niw-666', 'soft-cat1', '10', '1000', '2014-04-28',
-                    '666-999-666', '1', 'br-666', 'niw=666', 'user', 'Elmer',
-                    'Stevens', 'owner', 'Eric', 'Brown', 'Default region', '',
-                    '', '', '', '', '', '', '', '', '', '', '', '',
+                    'niw-666', 'soft-cat1', '10', '1000.00', '2014-04-28',
+                    '666-999-666', str(self.asset.id), 'br-666', 'niw=666',
+                    'user', 'Elmer', 'Stevens', 'owner', 'Eric', 'Brown',
+                    'Default region', '', '', '', '', '', '', '', '', '', '',
+                    '', '', '',
                 ],
                 [
-                    'niw-666', 'soft-cat1', '10', '1000', '2014-04-28',
+                    'niw-666', 'soft-cat1', '10', '1000.00', '2014-04-28',
                     '666-999-666', '', '', '', '', '', '', '', '', '', '',
-                    'user', 'Elmer', 'Stevens', '100',
+                    'user', 'Elmer', 'Stevens', '100.00',
                 ],
                 [
-                    'niw-666', 'soft-cat1', '10', '1000', '2014-04-28',
+                    'niw-666', 'soft-cat1', '10', '1000.00', '2014-04-28',
                     '666-999-666', '', '', '', '', '', '', '', '', '', '',
-                    'owner', 'Eric', 'Brown', '100',
+                    'owner', 'Eric', 'Brown', '100.00',
                 ],
             ]
         )
@@ -160,7 +162,7 @@ class TestExportRelations(TestCase):
         self.licence1.assign(self.owner)
         rows = [item for item in get_licences_rows(only_assigned=True)]
 
-        self.assertEqual(
+        self.assertListEqual(
             rows,
             [
                 [
@@ -172,37 +174,44 @@ class TestExportRelations(TestCase):
                     'first_name', 'last_name', 'single_cost',
                 ],
                 [
-                    'niw-666', 'soft-cat1', '10', '1000', '2014-04-28',
-                    '666-999-666', '1', 'br-666', 'niw=666', 'user', 'Elmer',
-                    'Stevens', 'owner', 'Eric', 'Brown', 'Default region',
-                    '', '', '', '', '', '', '', '', '', '', '', '', '',
+                    'niw-666', 'soft-cat1', '10', '1000.00', '2014-04-28',
+                    '666-999-666', str(self.asset.id), 'br-666', 'niw=666',
+                    'user', 'Elmer', 'Stevens', 'owner', 'Eric', 'Brown',
+                    'Default region', '', '', '', '', '', '', '', '', '', '',
+                    '', '', '',
                 ],
                 [
-                    'niw-666', 'soft-cat1', '10', '1000', '2014-04-28',
+                    'niw-666', 'soft-cat1', '10', '1000.00', '2014-04-28',
                     '666-999-666', '', '', '', '', '', '', '', '', '', '',
-                    'user', 'Elmer', 'Stevens', '100',
+                    'user', 'Elmer', 'Stevens', '100.00',
                 ],
                 [
-                    'niw-666', 'soft-cat1', '10', '1000', '2014-04-28',
+                    'niw-666', 'soft-cat1', '10', '1000.00', '2014-04-28',
                     '666-999-666', '', '', '', '', '', '', '', '', '', '',
-                    'owner', 'Eric', 'Brown', '100',
+                    'owner', 'Eric', 'Brown', '100.00',
                 ],
             ]
         )
 
 
 class TestHostnameGenerator(TestCase):
-    def setUp(self):
-        self.user = UserFactory()
-        self.user_pl = UserFactory()
-        self.user_pl.profile.country = Country.pl
-        self.user_pl.profile.save()
-        self.cat = AssetCategoryFactory()
-        self.cat1 = AssetCategoryFactory()
-        self.cat2 = AssetCategoryFactory()
-        self.cat3 = AssetCategoryFactory()
-        self.asset1 = BOAssetFactory()
-        self.asset2 = BOAssetFactory()
+
+    @classmethod
+    def setUpClass(cls):
+        cls.user = UserFactory()
+        cls.user_pl = UserFactory()
+        cls.user_pl.profile.country = Country.pl
+        cls.user_pl.profile.save()
+        cls.cat = AssetCategoryFactory()
+        cls.cat1 = AssetCategoryFactory()
+        cls.cat2 = AssetCategoryFactory()
+        cls.cat3 = AssetCategoryFactory()
+        cls.asset1 = BOAssetFactory()
+        cls.asset2 = BOAssetFactory()
+
+    @classmethod
+    def tearDownClass(cls):
+        call_command('flush', interactive=False, verbosity=0)
 
     def _check_hostname_not_generated(self, asset):
         asset._try_assign_hostname(True)
@@ -290,12 +299,13 @@ class TestHostnameAssigning(TestCase):
     neutral_status = models_assets.AssetStatus.new
     trigger_status = models_assets.AssetStatus.in_progress
 
-    def setUp(self):
-        self.owner = UserFactory()
-        self.neutral_status = models_assets.AssetStatus.new
-        self.trigger_status = models_assets.AssetStatus.in_progress
-        self.owner_country_name = models_assets.get_user_iso3_country_name(
-            self.owner
+    @classmethod
+    def setUpClass(cls):
+        cls.owner = UserFactory()
+        cls.neutral_status = models_assets.AssetStatus.new
+        cls.trigger_status = models_assets.AssetStatus.in_progress
+        cls.owner_country_name = models_assets.get_user_iso3_country_name(
+            cls.owner
         )
 
     def test_assigning_when_no_hostname(self):
@@ -515,22 +525,3 @@ class TestAssetStatuses(TestCase):
         self.assertEqual(len(found), len(models_assets.AssetStatus()) + 1)
         BLANK_IDX = 0
         self.assertNotIn(found[BLANK_IDX], models_assets.AssetStatus())
-
-
-class TestAssetUtils(TestCase):
-
-    def test_get_transition_url(self):
-        transition_type = 'return-asset'
-        assets_ids = [1]
-        assets_mode = 'back_office'
-        url = get_transition_url(transition_type, assets_ids, assets_mode)
-        self.assertTrue(url)
-        self.assertIn('transition_type=return-asset', url)
-        self.assertIn('select=1', url)
-
-    def test_empty_transition_url(self):
-        transition_type = ''
-        assets_ids = [1]
-        assets_mode = 'back_office'
-        url = get_transition_url(transition_type, assets_ids, assets_mode)
-        self.assertFalse(url)

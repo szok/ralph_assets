@@ -452,7 +452,7 @@ class BudgetInfo(
 
 class AssetLastHostname(models.Model):
     prefix = models.CharField(max_length=8, db_index=True)
-    counter = models.PositiveSmallIntegerField(default=1)
+    counter = models.PositiveIntegerField(default=1)
     postfix = models.CharField(max_length=8, db_index=True)
 
     class Meta:
@@ -975,16 +975,17 @@ class Asset(
         if not assets:
             return []
 
-        assets_slots_on = []
-        for asset in assets:
-            slot_no = re.match('(\d+)', asset.device_info.slot_no)
-            if slot_no:
-                assets_slots_on.append(int(slot_no.group(0)))
-        max_slot_no = max(assets_slots_on) if assets_slots_on else 0
-        if assets[0].device_info.slot_no:
-            ab = assets[0].device_info.slot_no[-1] in {'A', 'B'}
-        else:
-            ab = False
+        def get_number(slot_no):
+            """Returns the integer part of slot number"""
+            m = re.match('(\d+)', slot_no)
+            return (m and int(m.group(0))) or 0
+
+        max_slot_no = max([
+            get_number(asset.device_info.slot_no)
+            for asset in assets
+        ])
+        first_asset_slot_no = assets[0].device_info.slot_no
+        ab = first_asset_slot_no and first_asset_slot_no[-1] in {'A', 'B'}
         slot_nos = {asset.device_info.slot_no for asset in assets}
 
         def handle_missing(slot_no):

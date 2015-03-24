@@ -173,8 +173,8 @@ def create_category(type='data_center', name=DEFAULT_ASSET_DATA['category']):
     return subcategory
 
 
-def get_bulk_edit_post_data_part(*args, **kwargs):
-    id = kwargs.get('id')
+def get_bulk_edit_post_data_part(form_id, *args, **kwargs):
+    asset_id = kwargs.get('id')
 
     model_id = kwargs.get('model')
     if model_id is None:
@@ -194,38 +194,30 @@ def get_bulk_edit_post_data_part(*args, **kwargs):
         warehouse = create_warehouse()
         warehouse_id = warehouse.id
 
+    def field(field):
+        return 'form-{}-{}'.format(form_id, field)
+
     return {
-        'form-{0}-id'.format(id - 1): id,
-        'form-{0}-type'.format(id - 1):
-        kwargs.get('type', AssetType.data_center.id),
-        'form-{0}-model'.format(id - 1): model_id,
-        'form-{0}-invoice_no'.format(id - 1):
-        kwargs.get('invoice_no', 'Invoice No0'),
-        'form-{0}-invoice_date'.format(id - 1):
-        kwargs.get('invoice_date', '2014-01-01'),
-        'form-{0}-order_no'.format(id - 1):
-        kwargs.get('order_no', 'Order No0'),
-        'form-{0}-sn'.format(id - 1): sn,
-        'form-{0}-barcode'.format(id - 1): barcode,
-        'form-{0}-support_period'.format(id - 1):
-        kwargs.get('support_period', 24),
-        'form-{0}-support_type'.format(id - 1):
-        kwargs.get('support_type', 'standard0'),
-        'form-{0}-support_void_reporting'.format(id - 1):
-        kwargs.get('support_void_reporting', 'on'),
-        'form-{0}-provider'.format(id - 1):
-        kwargs.get('provider', 'Provider 0'),
-        'form-{0}-status'.format(id - 1):
-        kwargs.get('status', AssetStatus.in_progress.id),
-        'form-{0}-source'.format(id - 1):
-        kwargs.get('source', AssetSource.shipment.id),
-        'form-{0}-ralph_device_id'.format(id - 1):
-        kwargs.get('ralph_device_id', ''),
-        'form-{0}-price'.format(id - 1):
-        kwargs.get('price', 10),
-        'form-{0}-warehouse'.format(id - 1): warehouse_id,
-        'form-{0}-deprecation_rate'.format(id - 1):
-        kwargs.get('deprecation_rate', 25),
+        field('id'): asset_id,
+        field('type'): kwargs.get('type', AssetType.data_center.id),
+        field('model'): model_id,
+        field('invoice_no'): kwargs.get('invoice_no', 'Invoice No0'),
+        field('invoice_date'): kwargs.get('invoice_date', '2014-01-01'),
+        field('order_no'): kwargs.get('order_no', 'Order No0'),
+        field('sn'): sn,
+        field('barcode'): barcode,
+        field('support_period'): kwargs.get('support_period', 24),
+        field('support_type'): kwargs.get('support_type', 'standard0'),
+        field('support_void_reporting'): kwargs.get(
+            'support_void_reporting', 'on'
+        ),
+        field('provider'): kwargs.get('provider', 'Provider 0'),
+        field('status'): kwargs.get('status', AssetStatus.in_progress.id),
+        field('source'): kwargs.get('source', AssetSource.shipment.id),
+        field('ralph_device_id'): kwargs.get('ralph_device_id', ''),
+        field('price'): kwargs.get('price', 10),
+        field('warehouse'): warehouse_id,
+        field('deprecation_rate'): kwargs.get('deprecation_rate', 25),
     }
 
 
@@ -236,8 +228,7 @@ def get_bulk_edit_post_data(*args, **kwargs):
         'form-MAX_NUM_FORMS': u'',
     }
     for i, data in enumerate(args):
-        data['id'] = i + 1
-        post_data.update(get_bulk_edit_post_data_part(**data))
+        post_data.update(get_bulk_edit_post_data_part(form_id=i, **data))
     return post_data
 
 

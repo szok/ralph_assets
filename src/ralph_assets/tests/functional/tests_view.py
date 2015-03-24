@@ -57,7 +57,7 @@ from ralph_assets.tests.utils.assets import (
     DeviceInfoFactory,
     ServiceFactory,
     WarehouseFactory,
-    generate_barcode,
+    unique_str,
     generate_imei,
     get_device_info_dict,
 )
@@ -99,7 +99,7 @@ def get_asset_data():
         'budget_info': BudgetInfoFactory().id,
         'delivery_date': datetime.date(2013, 1, 7),
         'deprecation_end_date': datetime.date(2013, 7, 25),
-        'deprecation_rate': 77,
+        'deprecation_rate': '77.00',
         'device_environment': ci_relation.child.id,
         'invoice_date': datetime.date(2009, 2, 23),
         'invoice_no': 'Invoice no #3',
@@ -557,7 +557,7 @@ class TestDataCenterDevicesView(TestDevicesView, TestRegions, BaseViewsTest):
         form_data.update({
             'sn': ','.join(sns),
             'barcode': ','.join(
-                [generate_barcode() for i in xrange(2)],
+                [unique_str() for i in xrange(2)],
             ),
             'ralph_device_id': '',
         })
@@ -1109,6 +1109,7 @@ class TestLicencesView(TestRegions, BaseViewsTest):
             'attachments',
             'cache_version',
             'children',
+            'created',
             'licenceasset',
             'licenceuser',
             'modified',
@@ -1283,7 +1284,9 @@ class TestSupportsView(TestRegions, BaseViewsTest):
         exclude = set([
             'attachments',
             'assets',
+            'created',
             'cache_version',
+            'modified',
         ])
         constant_fields = set(original_support._meta.get_all_field_names())
         constant_fields.difference_update(exclude)

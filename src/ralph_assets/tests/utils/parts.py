@@ -21,7 +21,7 @@ from ralph_assets.models_parts import Part, PartModel, PartModelType
 from ralph_assets.tests.utils.assets import (
     AssetFactory,
     AssetType,
-    generate_sn,
+    unique_str,
     WarehouseFactory,
 )
 
@@ -47,4 +47,4 @@ class PartFactory(DjangoModelFactory):
 
     @lazy_attribute
     def sn(self):
-        return generate_sn()
+        return unique_str()

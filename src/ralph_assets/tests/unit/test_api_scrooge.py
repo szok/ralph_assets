@@ -166,8 +166,9 @@ class TestApiScrooge(TestCase):
     @mock.patch('ralph_assets.api_scrooge.logger')
     def test_get_asset_liquidated(self, logger_mock, is_liquidated_mock):
         is_liquidated_mock.return_value = True
-        DCAssetFactory()
         today = date(2013, 11, 12)
+        date_before_today = date(2012, 1, 1)
+        DCAssetFactory(invoice_date=date_before_today)
         result = [a for a in api_scrooge.get_assets(today)]
         self.assertEquals(result, [])
         self.assertTrue(logger_mock.info.called)

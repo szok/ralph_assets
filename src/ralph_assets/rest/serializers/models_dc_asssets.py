@@ -23,6 +23,18 @@ TYPE_ASSET = 'asset'
 TYPE_PDU = 'pdu'
 
 
+class AdminMixin(serializers.ModelSerializer):
+    """
+    A field that returns object's admin url
+    """
+
+    def admin_link(self, obj):
+        return reverse('admin:{app_label}_{module_name}_change'.format(
+            app_label=obj._meta.app_label,
+            module_name=obj._meta.module_name,
+        ), args=(obj.id,))
+
+
 class CoreDeviceMixin(object):
     def get_core_url(self, obj):
         """
@@ -118,10 +130,10 @@ class PDUSerializer(serializers.ModelSerializer):
         fields = ('model', 'sn', 'orientation', 'url')
 
 
-class RackSerializer(serializers.ModelSerializer):
+class RackSerializer(AdminMixin, serializers.ModelSerializer):
     free_u = serializers.IntegerField(source='get_free_u', read_only=True)
     orientation = serializers.CharField(source='get_orientation_desc')
-    rack_admin_url = serializers.SerializerMethodField('get_rack_admin_url')
+    rack_admin_url = serializers.SerializerMethodField('admin_link')
 
     class Meta:
         model = Rack
@@ -136,17 +148,13 @@ class RackSerializer(serializers.ModelSerializer):
         self.object.orientation = RackOrientation.id_from_name(orientation)
         return self.save(**self.data)
 
-    def get_rack_admin_url(self, obj):
-        return reverse(
-            'admin:ralph_assets_rack_change', args=(obj.id,),
-        )
 
-
-class DCSerializer(serializers.ModelSerializer):
+class DCSerializer(AdminMixin, serializers.ModelSerializer):
     rack_set = RackSerializer()
+    admin_link = serializers.SerializerMethodField('admin_link')
 
     class Meta:
         model = DataCenter
         fields = ('id', 'name', 'visualization_cols_num',
-                  'visualization_rows_num', 'rack_set')
+                  'visualization_rows_num', 'rack_set', 'admin_link')
         depth = 1

@@ -32,8 +32,6 @@ def short_history(obj, limit=5, full_history_button=True):
     if not obj:
         return {}
     history = obj.get_history()
-    if not history:
-        return {}
     return get_context(
         obj,
         history.order_by('-date'),
@@ -49,8 +47,6 @@ def status_history(obj, limit=5, full_history_button=True):
     if not obj:
         return {}
     history = obj.get_history(field_name='status')
-    if not history:
-        return {}
     return get_context(
         obj,
         history.order_by('-date'),

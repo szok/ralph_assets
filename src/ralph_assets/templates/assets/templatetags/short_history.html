@@ -37,5 +37,9 @@
         {% endfor %}
       </tbody>
     </table>
+  {% else %}
+    <div class="alert alert-info">
+      This object doesn't have any history.
+    </div>
   {% endif %}
 </div>

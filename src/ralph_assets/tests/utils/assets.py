@@ -8,7 +8,6 @@ from __future__ import unicode_literals
 import datetime
 import itertools
 import random
-from uuid import uuid1
 
 import factory
 from django.template.defaultfilters import slugify
@@ -55,12 +54,10 @@ category_code_set = 'ABCDEFGHIJKLMNOPRSTUVWXYZ1234567890'
 category_code_combinations = itertools.product(category_code_set, repeat=2)
 
 
-def generate_sn():
-    return str(uuid1())
-
-
-def generate_barcode():
-    return str(uuid1())
+def unique_str():
+    unique_str.counter += 1
+    return 'UNIQUE-{0:0>5}'.format(unique_str.counter)
+unique_str.counter = 0
 
 
 def generate_imei(n):
@@ -95,11 +92,11 @@ class OfficeInfoFactory(DjangoModelFactory):
 
     @lazy_attribute
     def license_key(self):
-        return str(uuid1())
+        return str(unique_str())
 
     @lazy_attribute
     def coa_number(self):
-        return str(uuid1())
+        return str(unique_str())
 
 
 class ServiceFactory(DjangoModelFactory):
@@ -257,7 +254,7 @@ class AssetFactory(DjangoModelFactory):
 
     @lazy_attribute
     def sn(self):
-        return generate_sn()
+        return unique_str()
 
 
 class BaseAssetFactory(DjangoModelFactory):
@@ -301,7 +298,7 @@ class BaseAssetFactory(DjangoModelFactory):
 
     @lazy_attribute
     def barcode(self):
-        return generate_barcode()
+        return unique_str()
 
     @lazy_attribute
     def created_by(self):
@@ -313,7 +310,7 @@ class BaseAssetFactory(DjangoModelFactory):
 
     @lazy_attribute
     def sn(self):
-        return generate_sn()
+        return unique_str()
 
     @factory.post_generation
     def device_environment(self, create, extracted, **kwargs):

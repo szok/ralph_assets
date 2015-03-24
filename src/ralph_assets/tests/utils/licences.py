@@ -8,7 +8,6 @@ from __future__ import unicode_literals
 import datetime
 from decimal import Decimal
 from random import randint, randrange
-from uuid import uuid1
 
 from factory import (
     fuzzy,
@@ -29,6 +28,7 @@ from ralph_assets.licences.models import (
     SoftwareCategory,
 )
 from ralph_assets.tests.utils.assets import (
+    unique_str,
     AssetFactory,
     AssetManufacturerFactory,
     AssetOwnerFactory,
@@ -78,7 +78,7 @@ class LicenceFactory(DjangoModelFactory):
 
     @lazy_attribute
     def niw(self):
-        return str(uuid1())
+        return str(unique_str())
 
     @lazy_attribute
     def number_bought(self):
@@ -95,7 +95,7 @@ class LicenceFactory(DjangoModelFactory):
 
     @lazy_attribute
     def sn(self):
-        return str(uuid1())
+        return str(unique_str())
 
     @post_generation
     def users(self, create, extracted, **kwargs):

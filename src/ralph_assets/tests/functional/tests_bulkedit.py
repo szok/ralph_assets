@@ -36,7 +36,6 @@ class TestBulkEdit(TestCase):
     1. Add two assets
     2. Check if data was saved
     """
-
     def setUp(self):
         self.client = login_as_su()
         self.category = AssetCategoryFactory()
@@ -50,13 +49,13 @@ class TestBulkEdit(TestCase):
         self.asset_service = ServiceFactory()
         self.common_asset_data = {  # DC & BO common data
             'barcode': 'barcode',
-            'deprecation_rate': '25',
+            'deprecation_rate': 25.77,
             'invoice_date': '2011-11-14',
             'invoice_no': 'invoice_no',
             'model': self.model,
             'order_no': 'order_no',
             'owner': self.user,
-            'price': '100',
+            'price': 101.22,
             'property_of': self.assetOwner,
             'service_name': self.asset_service,
             'source': models_assets.AssetSource.shipment,
@@ -73,6 +72,7 @@ class TestBulkEdit(TestCase):
         self.assertEqual(content.status_code, 200)
 
         post_data = get_bulk_edit_post_data({
+            'id': self.asset.id,
             'model': self.model.id,
             'invoice_no': 'Invoice No1',
             'order_no': 'Order No1',
@@ -81,6 +81,7 @@ class TestBulkEdit(TestCase):
             'sn': '3333-3333-3333-3333',
             'barcode': 'bc-3333-3333-3333-3333',
         }, {
+            'id': self.asset1.id,
             'model': self.model1.id,
             'invoice_no': 'Invoice No2',
             'order_no': 'Order No2',
