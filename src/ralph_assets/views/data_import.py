@@ -355,16 +355,17 @@ class XlsUploadView(SessionWizardView, AssetsBase):
                             amd_model_object.save()
                             setattr(asset, amd_field, amd_model_object)
                         if isinstance(asset, Asset):
-                            asset.type = MODE2ASSET_TYPE[self.mode]
-                            device = asset.find_device_to_link()
-                            if not device and self.mode == 'dc':
-                                msg = (
-                                    "Unable to match asset nor"
-                                    "'barcode' {!r} nor sn {!r}".format(
-                                        asset.barcode, asset.sn,
+                            if not settings.DATA_IMPORTER['import_unmatched_assets']:  # noqa
+                                asset.type = MODE2ASSET_TYPE[self.mode]
+                                device = asset.find_device_to_link()
+                                if not device and self.mode == 'dc':
+                                    msg = (
+                                        "Unable to match asset nor"
+                                        "'barcode' {!r} nor sn {!r}".format(
+                                            asset.barcode, asset.sn,
+                                        )
                                     )
-                                )
-                                raise Exception(msg)
+                                    raise Exception(msg)
 
                         else:
                             asset.asset_type = MODE2ASSET_TYPE[self.mode]

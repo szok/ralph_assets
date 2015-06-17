@@ -10,6 +10,7 @@ import uuid
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.test.utils import override_settings
 from ralph.cmdb.tests.utils import CIRelationFactory
 from ralph.discovery.tests.util import DeviceFactory
 
@@ -341,6 +342,32 @@ class TestDCAssetDataImporter(TestDataImporter, ClientMixin, TestCase):
         self._import_by_csv(csv_data.keys(), [csv_data.values()])
         added_obj = self.Model.objects.latest('id')
         self._check_object_against_csv(added_obj, csv_data)
+
+    @override_settings(DATA_IMPORTER={'import_unmatched_assets': True})
+    def test_add_unmatched_when_matching_is_disabled(self):
+        csv_data = self._get_csv_data(
+            important_data={
+                'barcode': 'not-matched-barcode',
+                'sn': 'not-matched-sn',
+            },
+        )
+        self._import_by_csv(csv_data.keys(), [csv_data.values()])
+        added_obj = self.Model.objects.get(sn=csv_data['sn'])
+        self.assertTrue(added_obj)
+        self._check_object_against_csv(added_obj, csv_data)
+        self.assertTrue(added_obj.get_ralph_device())
+
+    @override_settings(DATA_IMPORTER={'import_unmatched_assets': False})
+    def test_dont_add_unmatched_when_matching_is_enabled(self):
+        csv_data = self._get_csv_data(
+            important_data={
+                'barcode': 'not-matched-barcode',
+                'sn': 'not-matched-sn',
+            },
+        )
+        self._import_by_csv(csv_data.keys(), [csv_data.values()])
+        with self.assertRaises(self.Model.DoesNotExist):
+            self.Model.objects.get(sn=csv_data['sn'])
 
     def test_add_by_import_with_new_foreign_keys(self):
         """
