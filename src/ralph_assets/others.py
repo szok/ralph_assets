@@ -34,6 +34,7 @@ ASSETS_COLUMNS = [
     'invoice_date',
     'invoice_no',
     'region__name',
+    'hostname',
 ]
 LICENCES_COLUMNS = [
     'niw',
