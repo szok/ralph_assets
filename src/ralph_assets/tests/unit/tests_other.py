@@ -112,14 +112,14 @@ class TestExportRelations(TestCase):
                     'owner__profile__company', 'owner__profile__segment',
                     'status', 'service_name__name', 'property_of',
                     'warehouse__name', 'invoice_date', 'invoice_no',
-                    'region__name',
+                    'region__name', 'hostname',
                 ],
                 [
                     self.asset.id, 'niw=666', 'br-666', '1111-1111-1111-1111',
                     'Subcategory', 'Manufacturer1', 'Model1', 'user', 'Elmer',
                     'Stevens', 'owner', 'Eric', 'Brown', company, segment,
                     1, None, None, 'Warehouse', datetime.date(2014, 4, 28),
-                    'invoice-6666', 'Default region',
+                    'invoice-6666', 'Default region', self.asset.hostname,
                 ],
             ]
         )
