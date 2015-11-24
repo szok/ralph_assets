@@ -41,6 +41,7 @@ from ralph_assets.forms_utils import RegionRelatedSearchField, RegionSearchForm
 from ralph.account.models import Region
 from ralph.middleware import get_actual_regions
 from ralph_assets.models import AssetType
+from ralph_assets.signals import post_customize_fields as customize_fields
 from ralph_assets.models_assets import MODE2ASSET_TYPE
 
 
@@ -144,6 +145,7 @@ class LicenceForm(forms.ModelForm):
         self.fields['region'] = ModelChoiceField(
             queryset=get_actual_regions(),
         )
+        customize_fields.send(sender=self, mode=None)
 
     def clean(self, *args, **kwargs):
         result = super(LicenceForm, self).clean(*args, **kwargs)
