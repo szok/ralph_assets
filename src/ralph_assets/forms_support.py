@@ -28,6 +28,7 @@ from ralph_assets.forms import LOOKUPS, ReadOnlyFieldsMixin
 from ralph_assets.forms_utils import RegionRelatedSearchField, RegionSearchForm
 from ralph_assets.models import AssetType
 from ralph_assets.models_support import SupportType
+from ralph_assets.signals import post_customize_fields as customize_fields
 
 
 class SupportForm(forms.ModelForm):
@@ -96,6 +97,7 @@ class SupportForm(forms.ModelForm):
         self.fields['region'] = ModelChoiceField(
             queryset=get_actual_regions(),
         )
+        customize_fields.send(sender=self, mode=None)
 
 
 class AddSupportForm(SupportForm):

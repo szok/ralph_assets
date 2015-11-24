@@ -10,6 +10,7 @@ from django import forms
 from django.forms.models import modelformset_factory
 
 from ralph_assets.widgets import IntegerWidget
+from ralph_assets.signals import post_customize_fields as customize_fields
 
 
 ISO_3166 = (
@@ -99,6 +100,7 @@ def assigned_formset_factory(obj, base_model, field, lookup,
                 }),
                 initial=1,
             )
+            customize_fields.send(sender=self, mode=None)
 
         class Meta:
             model = base_model
