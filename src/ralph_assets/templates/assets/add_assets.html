@@ -5,7 +5,6 @@
 {% load assets %}
 
 {% block content %}
-
 <div class="row-fluid">
   <h3>{% block form_title %}{% endblock %}</h3>
 </div>
@@ -80,11 +79,13 @@
     <div class="row-fluid">
       <div class="span12">
         <div class="form-actions">
-          <button name="asset" type="submit" class="btn btn-primary">
-            {% trans "Save" %}
-          </button>
-          {% if mode == 'back_office' and asset %}
-            {% transition_button asset %}
+          {% if not assets_disabled %}
+            <button name="asset" type="submit" class="btn btn-primary">
+              {% trans "Save" %}
+            </button>
+            {% if mode == 'back_office' and asset %}
+              {% transition_button asset %}
+            {% endif %}
           {% endif %}
         </div>
       </div>

@@ -68,6 +68,7 @@ def multi_assign_widget(empty_formset, formset):
     return {
         'empty_formset': empty_formset,
         'formset': formset,
+        'assets_disabled': getattr(settings, 'ASSETS_DISABLED', False)
     }
 
 

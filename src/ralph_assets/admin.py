@@ -7,6 +7,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.filters import SimpleListFilter
 from django.core.exceptions import ValidationError
@@ -41,7 +42,33 @@ from ralph_assets.licences.models import LicenceType, SoftwareCategory
 from ralph_assets.models_support import Support, SupportType
 
 
-class SupportAdmin(ModelAdmin):
+class AssetDisabledMixin(object):
+
+    @property
+    def assets_disabled(self):
+        return getattr(settings, 'ASSETS_DISABLED', False)
+
+    def has_add_permission(self, request):
+        if not self.assets_disabled:
+            return super(AssetDisabledMixin, self).has_add_permission(request)
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if not self.assets_disabled:
+            return super(AssetDisabledMixin, self).has_change_permission(
+                request, obj
+            )
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if not self.assets_disabled:
+            return super(AssetDisabledMixin, self).has_delete_permission(
+                request, obj
+            )
+        return False
+
+
+class SupportAdmin(AssetDisabledMixin, ModelAdmin):
     raw_id_fields = ('assets',)
     date_hierarchy = 'date_to'
     exclude = ('attachments',)
@@ -61,14 +88,14 @@ class SupportAdmin(ModelAdmin):
 admin.site.register(Support, SupportAdmin)
 
 
-class SupportTypeAdmin(ModelAdmin):
+class SupportTypeAdmin(AssetDisabledMixin, ModelAdmin):
     search_fields = ('name',)
 
 
 admin.site.register(SupportType, SupportTypeAdmin)
 
 
-class SoftwareCategoryAdmin(ModelAdmin):
+class SoftwareCategoryAdmin(AssetDisabledMixin, ModelAdmin):
     search_fields = ('name',)
     list_display = ('name', 'asset_type',)
     list_filter = ('asset_type',)
@@ -77,21 +104,21 @@ class SoftwareCategoryAdmin(ModelAdmin):
 admin.site.register(SoftwareCategory, SoftwareCategoryAdmin)
 
 
-class LicenceTypeAdmin(ModelAdmin):
+class LicenceTypeAdmin(AssetDisabledMixin, ModelAdmin):
     search_fields = ('name',)
 
 
 admin.site.register(LicenceType, LicenceTypeAdmin)
 
 
-class AssetOwnerAdmin(ModelAdmin):
+class AssetOwnerAdmin(AssetDisabledMixin, ModelAdmin):
     search_fields = ('name',)
 
 
 admin.site.register(AssetOwner, AssetOwnerAdmin)
 
 
-class ImportProblemAdmin(ModelAdmin):
+class ImportProblemAdmin(AssetDisabledMixin, ModelAdmin):
     change_form_template = "assets/import_problem_change_form.html"
     list_filter = ('severity', 'content_type',)
     list_display = ('message', 'object_id', 'severity', 'content_type',)
@@ -109,7 +136,7 @@ class ImportProblemAdmin(ModelAdmin):
 admin.site.register(ImportProblem, ImportProblemAdmin)
 
 
-class WarehouseAdmin(ModelAdmin):
+class WarehouseAdmin(AssetDisabledMixin, ModelAdmin):
     save_on_top = True
     list_display = ('name',)
     search_fields = ('name',)
@@ -118,7 +145,7 @@ class WarehouseAdmin(ModelAdmin):
 admin.site.register(Warehouse, WarehouseAdmin)
 
 
-class BudgetInfoAdmin(ModelAdmin):
+class BudgetInfoAdmin(AssetDisabledMixin, ModelAdmin):
     save_on_top = True
     list_display = ('name',)
     search_fields = ('name',)
@@ -154,7 +181,7 @@ class AssetAdminForm(forms.ModelForm):
         self.fields['region'].queryset = middleware.get_actual_regions()
 
 
-class AssetAdmin(ModelAdmin):
+class AssetAdmin(AssetDisabledMixin, ModelAdmin):
     fields = (
         'sn',
         'type',
@@ -197,7 +224,7 @@ class AssetAdmin(ModelAdmin):
 admin.site.register(Asset, AssetAdmin)
 
 
-class AssetModelAdmin(ModelAdmin):
+class AssetModelAdmin(AssetDisabledMixin, ModelAdmin):
     save_on_top = True
     list_display = ('name', 'type', 'category', 'show_assets_count',)
     list_filter = ('type', 'category',)
@@ -227,7 +254,7 @@ class AssetCategoryAdminForm(forms.ModelForm):
         return data
 
 
-class AssetCategoryAdmin(ModelAdmin):
+class AssetCategoryAdmin(AssetDisabledMixin, ModelAdmin):
     def name(self):
         type = AssetCategoryType.desc_from_id(self.type)
         if self.parent:
@@ -246,7 +273,7 @@ class AssetCategoryAdmin(ModelAdmin):
 admin.site.register(AssetCategory, AssetCategoryAdmin)
 
 
-class AssetManufacturerAdmin(ModelAdmin):
+class AssetManufacturerAdmin(AssetDisabledMixin, ModelAdmin):
     save_on_top = True
     list_display = ('name',)
     search_fields = ('name',)
@@ -262,7 +289,7 @@ class ReportOdtSourceLanguageInline(admin.TabularInline):
     fields = ('template', 'language',)
 
 
-class ReportOdtSourceAdmin(ModelAdmin):
+class ReportOdtSourceAdmin(AssetDisabledMixin, ModelAdmin):
     save_on_top = True
     search_fields = ('name', 'slug',)
     list_display = ('name', 'slug',)
@@ -275,7 +302,7 @@ class ReportOdtSourceAdmin(ModelAdmin):
 admin.site.register(ReportOdtSource, ReportOdtSourceAdmin)
 
 
-class TransitionAdmin(ModelAdmin):
+class TransitionAdmin(AssetDisabledMixin, ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     filter_horizontal = ('actions',)
     list_filter = ('from_status', 'to_status', 'required_report',)
@@ -287,7 +314,7 @@ class TransitionAdmin(ModelAdmin):
 admin.site.register(Transition, TransitionAdmin)
 
 
-class TransitionsHistoryAdmin(ModelAdmin):
+class TransitionsHistoryAdmin(AssetDisabledMixin, ModelAdmin):
     list_display = ('transition', 'logged_user', 'affected_user', 'created',)
     readonly_fields = (
         'transition', 'assets', 'logged_user', 'affected_user', 'report_file',
@@ -300,7 +327,7 @@ class TransitionsHistoryAdmin(ModelAdmin):
 admin.site.register(TransitionsHistory, TransitionsHistoryAdmin)
 
 
-class CoaOemOsAdmin(ModelAdmin):
+class CoaOemOsAdmin(AssetDisabledMixin, ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
 
@@ -308,7 +335,7 @@ class CoaOemOsAdmin(ModelAdmin):
 admin.site.register(CoaOemOs, CoaOemOsAdmin)
 
 
-class ServiceAdmin(ModelAdmin):
+class ServiceAdmin(AssetDisabledMixin, ModelAdmin):
     list_display = ('name', 'profit_center', 'cost_center',)
     search_fields = ('name', 'profit_center', 'cost_center',)
 
@@ -316,7 +343,7 @@ class ServiceAdmin(ModelAdmin):
 admin.site.register(Service, ServiceAdmin)
 
 
-class LicenceAdmin(ModelAdmin):
+class LicenceAdmin(AssetDisabledMixin, ModelAdmin):
     def name(self):
         return self.__unicode__()
 
@@ -364,7 +391,7 @@ class DataCenterForm(forms.ModelForm):
         return data
 
 
-class DataCenterAdmin(ModelAdmin):
+class DataCenterAdmin(AssetDisabledMixin, ModelAdmin):
     form = DataCenterForm
     save_on_top = True
     list_display = ('name', 'visualization_cols_num', 'visualization_rows_num')
@@ -382,7 +409,7 @@ class DataCenterAdmin(ModelAdmin):
 admin.site.register(models_assets.DataCenter, DataCenterAdmin)
 
 
-class ServerRoomAdmin(ModelAdmin):
+class ServerRoomAdmin(AssetDisabledMixin, ModelAdmin):
     save_on_top = True
     list_display = ('name', 'data_center')
     search_fields = ('name', 'data_center__name')
@@ -456,7 +483,7 @@ class AccessoryInline(admin.TabularInline):
     extra = 1
 
 
-class RackAdmin(ModelAdmin):
+class RackAdmin(AssetDisabledMixin, ModelAdmin):
     form = RackForm
     save_on_top = True
     raw_id_fields = ('deprecated_ralph_rack',)
@@ -485,7 +512,7 @@ class RackAdmin(ModelAdmin):
 admin.site.register(models_assets.Rack, RackAdmin)
 
 
-class AccessoryAdmin(ModelAdmin):
+class AccessoryAdmin(AssetDisabledMixin, ModelAdmin):
     save_on_top = True
     list_display = ('name',)
     search_fields = ('name',)

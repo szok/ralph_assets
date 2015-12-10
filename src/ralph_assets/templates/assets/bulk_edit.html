@@ -56,9 +56,11 @@
   </div>
   <div class="row">
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary">Save</button>
-      {% if mode == 'back_office' %}
-        {% transition_button assets=assets %}
+      {% if not assets_disabled %}
+        <button type="submit" class="btn btn-primary">Save</button>
+        {% if mode == 'back_office' %}
+          {% transition_button assets=assets %}
+        {% endif %}
       {% endif %}
     </div>
   </div>

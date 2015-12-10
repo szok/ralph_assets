@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import logging
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404
@@ -49,6 +50,7 @@ class AddPart(HardwareModeMixin, SubmoduleModeMixin, AssetsBase):
             'part_info_form': self.part_info_form,
             'form_id': 'add_part_form',
             'edit_mode': False,
+            'assets_disabled': getattr(settings, 'ASSETS_DISABLED', False)
         })
         return ret
 

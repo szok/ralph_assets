@@ -41,6 +41,15 @@
             });
         });
     </script>
+    {% if assets_disabled %}
+      <script type="text/javascript">
+      $(document).ready(function() {
+        $("input, select, textarea").prop('disabled', true);
+        // Turn of in sidebar search
+        $('#sidebar_search input, #sidebar_search select, #sidebar_search textarea').prop('disabled', false);
+      });
+      </script>
+    {% endif %}
 {% endblock %}
 
 {% block contentarea %}

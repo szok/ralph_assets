@@ -10,6 +10,7 @@ import urllib
 
 from bob.data_table import DataTableColumn
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import Sum
@@ -306,6 +307,7 @@ class LicenceFormView(LicenceBaseView):
             'caption': self.caption,
             'licence': getattr(self, 'licence', None),
             'mode': 'back_office',  # -1 to technical debt
+            'assets_disabled': getattr(settings, 'ASSETS_DISABLED', False)
         })
         return ret
 

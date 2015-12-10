@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 from bob.djid import Djid
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -45,6 +46,7 @@ class SupportView(AssetsBase):
             'edit_mode': False,
             'caption': self.caption,
             'support': getattr(self, 'support', None),
+            'assets_disabled': getattr(settings, 'ASSETS_DISABLED', False)
         })
         return ret
 

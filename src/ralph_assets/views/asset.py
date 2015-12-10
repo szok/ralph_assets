@@ -9,6 +9,7 @@ import logging
 
 from collections import defaultdict
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -92,6 +93,7 @@ class AssetSearch(Report, HardwareModeMixin, AssetSearchDataTable):
         context = super(AssetSearch, self).get_context_data(*args, **kwargs)
         context.update({
             'url_query': self.request.GET,
+            'assets_disabled': getattr(settings, 'ASSETS_DISABLED', False)
         })
         return context
 

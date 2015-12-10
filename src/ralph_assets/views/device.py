@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import logging
 from collections import Counter
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -57,6 +58,7 @@ class AddDevice(HardwareModeMixin, SubmoduleModeMixin, AssetsBase):
             'form_id': 'add_device_asset_form',
             'edit_mode': False,
             'multivalue_fields': ['sn', 'barcode', 'imei'],
+            'assets_disabled': getattr(settings, 'ASSETS_DISABLED', False)
         })
         return ret
 
@@ -164,6 +166,7 @@ class EditDevice(HardwareModeMixin, SubmoduleModeMixin, AssetsBase):
             'edit_mode': True,
             'parts': self.parts,
             'asset': self.asset,
+            'assets_disabled': getattr(settings, 'ASSETS_DISABLED', False)
         })
         return context
 

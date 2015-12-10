@@ -128,33 +128,35 @@
             <div class="progress" id="async-progress">
                 <div class="bar"></div>
             </div>
-            <div class="btn-group pull-left">
-              <a class="btn dropdown-toggle btn-primary" data-toggle="dropdown" href="#">
-                {% trans "Bulk actions..." %}
-                <span class="caret"></span>
-              </a>
-            <ul class="dropdown-menu">
-                <li>
-                    <a href="#" id='post_add_attachment'>{% trans "Add attachments" %}</a>
-                </li>
-            {% if asset_reports_enable %}
-                <li>
-                    <a href="#" id='post_invoice_report_selected'>
-                        {% trans "Invoice report from selected" %}
-                    </a>
-                </li>
-                <li class="divider"></li>
-            {% endif %}
-                <li>
-                    <a href="#" id='post_edit_all'>{% trans "Edit selected" %}</a>
-                </li>
-                {% if mode == 'dc' %}
-                <li>
-                    <a href="#" id='post_edit_all_location'>{% trans "Edit location" %}</a>
-                </li>
+            {% if not assets_disabled %}
+                <div class="btn-group pull-left">
+                  <a class="btn dropdown-toggle btn-primary" data-toggle="dropdown" href="#">
+                    {% trans "Bulk actions..." %}
+                    <span class="caret"></span>
+                  </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" id='post_add_attachment'>{% trans "Add attachments" %}</a>
+                    </li>
+                {% if asset_reports_enable %}
+                    <li>
+                        <a href="#" id='post_invoice_report_selected'>
+                            {% trans "Invoice report from selected" %}
+                        </a>
+                    </li>
+                    <li class="divider"></li>
                 {% endif %}
-            </ul>
-            </div>
+                    <li>
+                        <a href="#" id='post_edit_all'>{% trans "Edit selected" %}</a>
+                    </li>
+                    {% if mode == 'dc' %}
+                    <li>
+                        <a href="#" id='post_edit_all_location'>{% trans "Edit location" %}</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                </div>
+            {% endif %}
             {% if asset_transitions_enable %}
             <div class="btn-group pull-left">
                 <a class="btn dropdown-toggle btn-info" data-toggle="dropdown" href="#">

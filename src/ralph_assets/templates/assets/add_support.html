@@ -10,6 +10,7 @@
 {{ error }}
 </div>
 {% endfor %}
+
 <form id="{{ form_id }}" class="form form-horizontal" method="POST"{% if edit_mode %} enctype="multipart/form-data"{% endif %} {% dependency_data asset_form %}>
   {% csrf_token %}
   <div class="row-fluid">
@@ -22,6 +23,7 @@
       {% short_history support %}
     </div>
   </div>
+  {% if not assets_disabled %}
   <div class="row-fluid">
     <div class="span12">
       <div class="form-actions">
@@ -29,6 +31,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 </form>
 
 {% include 'assets/attachment_deletion.html' with attachment_parent=support parent_name='support'%}
